@@ -15,7 +15,7 @@ int main(){
     FILE *file;
     file = fopen("addresses.txt", "r");
     char pg[SIZE]; //#define SIZE 100
-    int num_add = 0;
+    int total_add = 0;
 
     if (file == NULL)
     {
@@ -29,8 +29,8 @@ int main(){
         int offset = log_add & OFFSET_MASK;
         int log_pg = (log_add >> OFFSET_BITS) & PAGE_MASK;
         printf("PAGE# : %d      OFFSET : %d \n", log_pg, offset);
-        num_add = num_add + 1;
+        total_add = total_add + 1;
     }
-    printf("TOTAL NUMBER OF PAGES : %d \n", num_add);
+    printf("TOTAL NUMBER OF PAGES : %d \n", total_add);
     return 0;
 }
