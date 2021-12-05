@@ -53,9 +53,12 @@ int main(int argc, const char *argv[]){
         int phy_add = (phy_pg << OFFSET_BITS) | offset;
         signed char val = main_mem[phy_pg * PAGE_SIZE + offset];
 
+        fprintf(output_fp, "LOGGICAL ADDRESS : %d   PHYSICAL ADDRESS : %d   VALUE : %d \n", log_add, phy_add, val);
         printf("PAGE# : %d      OFFSET : %d \n", log_pg, offset);
         total_add = total_add + 1;
     }
+    printf("PAGE FAULTS : %d \n", pg_fault);
+    printf("PAAGE FAULT RATE (percentage) : %.1f \n", (pg_fault / (total_add*1.))*100);
     printf("TOTAL NUMBER OF PAGES : %d \n", total_add);
     return 0;
 }
