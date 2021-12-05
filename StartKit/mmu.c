@@ -23,11 +23,23 @@ int main(){
         exit(1);        
     }
 
+    //initialize entries of page table to -1 for empty table
+    for (int i = 0; i < PAGES; i++)
+    {
+        pg_table[i] = -1;
+    }
+    
+
     while(fgets(pg,SIZE,file) != NULL)
     {
         int log_add = atoi(pg);
         int offset = log_add & OFFSET_MASK;
         int log_pg = (log_add >> OFFSET_BITS) & PAGE_MASK;
+        if (pg_table[log_pg] == -1)
+        {
+            /* code */
+        }
+        
         printf("PAGE# : %d      OFFSET : %d \n", log_pg, offset);
         total_add = total_add + 1;
     }
