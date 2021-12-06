@@ -8,9 +8,9 @@
 #include "tlb.h"
 #include "func.h"
 #include "func.c"
-#define SIZE 10
+#define SIZE 10 
 
-//Page and fram and TLB specifications
+//Page, Frame and TLB specifications
 #define TLB_SIZE 16
 #define PAGES 256
 #define PAGE_MASK 255
@@ -19,6 +19,7 @@
 #define OFFSET_MASK 255
 #define MEM_size PAGES * PAGE_SIZE
 
+//initialization of TLB, index for TLB, page table, and pointer to the backing store file
 struct TLB_val tlb[TLB_SIZE];
 int pg_table[PAGES];
 signed char main_mem[MEM_size];
@@ -30,12 +31,13 @@ int main(int argc, const char *argv[])
 {
     if (argc != 4)
     {
-        printf("please enter 4 arguements : ./mmu 256 <Backing Store> <Input File>");
+        printf("please enter command in format shown ------> ./mmu 256 <Backing Store> <Input File>");
         exit(0);
     }
     
      //initialize entries of page table to -1 for empty table
-     for (int i = 0; i < PAGES; i++)
+     int i;
+     for (i = 0; i < PAGES; i++)
      {
          pg_table[i] = -1;
      }
@@ -55,13 +57,13 @@ int main(int argc, const char *argv[])
     int total_add = 0; //store total number of addresses read
     int pg_fault = 0; //counter for page faults
     int hits = 0; //counter for TLB hits 
+    unsigned char free_pg = 0; // keeping track of free pages available
 
-    if (input == NULL)
+    if (input == NULL) // check if the input file exists
     {
         printf("file does not exist!");
         exit(1);        
     }
-    unsigned char free_pg = 0;
     while(fgets(pg,SIZE,input) != NULL)
     {
         int log_add = atoi(pg);
@@ -76,6 +78,7 @@ int main(int argc, const char *argv[])
         }
         else
         { //TLB miss
+          phy_pg = pg_table[log_pg];
            if (phy_pg == -1) //check if page exists in page table, if value = -1 then page fault
            {
              pg_fault = pg_fault + 1;
@@ -99,6 +102,5 @@ int main(int argc, const char *argv[])
     fprintf(output, "Page Faults Rate, %.2f%%,\n", (pg_fault / (total_add*1.))*100);
     //printf("PAAGE FAULT RATE (percentage) : %.2f \n", (pg_fault / (total_add*1.))*100);
     fprintf(output, "TLB Hits Rate, %.2f%%,", (hits/(1. * total_add))*100);
-    printf("TOTAL NUMBER OF PAGES : %d \n", total_add);
     return 0;
 }
