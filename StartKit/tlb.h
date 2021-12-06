@@ -3,7 +3,7 @@
 
 // representation of a entry in TLB
 struct TLB_val{
-    unsigned char log_add;
-    unsigned char phy_add;
+    unsigned char log_pg;
+    unsigned char phy_pg;
 };
 #endif
