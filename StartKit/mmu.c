@@ -8,16 +8,18 @@
 #include "tlb.h"
 #include "func.h"
 #include "func.c"
-#define SIZE 10 
+#define SIZE 100 
 
 //Page, Frame and TLB specifications
 #define TLB_SIZE 16
 #define PAGES 256
+#define MEM_size PAGES * PAGE_SIZE
+//definitions for bit masking
 #define PAGE_MASK 255
 #define PAGE_SIZE 256
 #define OFFSET_BITS 8
 #define OFFSET_MASK 255
-#define MEM_size PAGES * PAGE_SIZE
+
 
 //initialization of TLB, index for TLB, page table, and pointer to the backing store file
 struct TLB_val tlb[TLB_SIZE];
@@ -72,14 +74,14 @@ int main(int argc, const char *argv[])
         int phy_pg = search_pg(log_pg, pg_index, tlb);
         total_add = total_add + 1;
         //TLB hit
-        if (phy_pg != -1)
+        if (phy_pg != -1) // there is a value in the TLB for the current logical page
         {
             hits = hits + 1;
         }
         else
         { //TLB miss
           phy_pg = pg_table[log_pg];
-           if (phy_pg == -1) //check if page exists in page table, if value = -1 then page fault
+           if (phy_pg == -1) //check if page exists in page table otherwise, if value = -1 then page fault
            {
              pg_fault = pg_fault + 1;
              phy_pg = free_pg;
@@ -88,7 +90,7 @@ int main(int argc, const char *argv[])
              memcpy(main_mem + phy_pg * PAGE_SIZE, backingStore_ptr + log_pg * PAGE_SIZE, PAGE_SIZE);
              pg_table[log_pg] = phy_pg;
            }
-          pg_index = add_pg(log_pg, phy_pg, tlb, pg_index); 
+          pg_index = add_pg(log_pg, phy_pg, tlb, pg_index); //adding page and corresponding physical page to the TLB 
         }
         
         int phy_add = (phy_pg << OFFSET_BITS) | offset;
@@ -99,8 +101,8 @@ int main(int argc, const char *argv[])
         
     }
     //printf("PAGE FAULTS : %d \n", pg_fault);
-    fprintf(output, "Page Faults Rate, %.2f%%,\n", (pg_fault / (total_add*1.))*100);
+    fprintf(output, "Page Faults Rate, %.2f%%,\n", ( pg_fault / (total_add * 1.) )*100);
     //printf("PAAGE FAULT RATE (percentage) : %.2f \n", (pg_fault / (total_add*1.))*100);
-    fprintf(output, "TLB Hits Rate, %.2f%%,", (hits/(1. * total_add))*100);
+    fprintf(output, "TLB Hits Rate, %.2f%%,", ( hits / (total_add * 1.) )*100);
     return 0;
 }
