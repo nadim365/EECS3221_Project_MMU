@@ -8,7 +8,7 @@
 #include "tlb.h"
 #include "func.h"
 #include "func.c"
-#define SIZE 100
+#define SIZE 10
 
 //Page and fram and TLB specifications
 #define TLB_SIZE 16
@@ -19,11 +19,12 @@
 #define OFFSET_MASK 255
 #define MEM_size PAGES * PAGE_SIZE
 
+struct TLB_val tlb[TLB_SIZE];
 int pg_table[PAGES];
 signed char main_mem[MEM_size];
 signed char *backingStore_ptr;
-struct TLB_val tlb[TLB_SIZE];
-int index = 0; // count how many pages inserted into TLB
+int pg_index = 0; // count how many pages inserted into TLB
+
 
 int main(int argc, const char *argv[])
 {
@@ -66,7 +67,7 @@ int main(int argc, const char *argv[])
         int log_add = atoi(pg);
         int offset = log_add & OFFSET_MASK;
         int log_pg = (log_add >> OFFSET_BITS) & PAGE_MASK;
-        int phy_pg = search_pg(log_pg, index, tlb);
+        int phy_pg = search_pg(log_pg, pg_index, tlb);
         total_add = total_add + 1;
         //TLB hit
         if (phy_pg != -1)
@@ -81,10 +82,10 @@ int main(int argc, const char *argv[])
              phy_pg = free_pg;
              free_pg = free_pg + 1;
              //reading from the backing store for that logical page to get physical page/address
-             memcpy(main_mem + phy_pg *PAGE_SIZE, backingStore_ptr + log_pg * PAGE_SIZE, PAGE_SIZE);
+             memcpy(main_mem + phy_pg * PAGE_SIZE, backingStore_ptr + log_pg * PAGE_SIZE, PAGE_SIZE);
              pg_table[log_pg] = phy_pg;
            }
-           add_pg(log_pg, phy_pg, tlb, index);
+          pg_index = add_pg(log_pg, phy_pg, tlb, pg_index); 
         }
         
         int phy_add = (phy_pg << OFFSET_BITS) | offset;
@@ -97,6 +98,7 @@ int main(int argc, const char *argv[])
     //printf("PAGE FAULTS : %d \n", pg_fault);
     fprintf(output, "Page Faults Rate, %.2f%%,\n", (pg_fault / (total_add*1.))*100);
     //printf("PAAGE FAULT RATE (percentage) : %.2f \n", (pg_fault / (total_add*1.))*100);
+    fprintf(output, "TLB Hits Rate, %.2f%%,", (hits/(1. * total_add))*100);
     printf("TOTAL NUMBER OF PAGES : %d \n", total_add);
     return 0;
 }
