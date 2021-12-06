@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "tlb.h"
+#include "func.h"
+#include "func.c"
 #define SIZE 100
 
 //Page and fram and TLB specifications
@@ -51,6 +53,7 @@ int main(int argc, const char *argv[])
     char pg[SIZE]; //to store lines read from input file
     int total_add = 0; //store total number of addresses read
     int pg_fault = 0; //counter for page faults
+    int hits = 0; //counter for TLB hits 
 
     if (input == NULL)
     {
@@ -63,16 +66,25 @@ int main(int argc, const char *argv[])
         int log_add = atoi(pg);
         int offset = log_add & OFFSET_MASK;
         int log_pg = (log_add >> OFFSET_BITS) & PAGE_MASK;
-        int phy_pg = pg_table[log_pg];
+        int phy_pg = search_pg(log_pg, index, tlb);
         total_add = total_add + 1;
-        if (phy_pg == -1) //check if page exists in page table, if value = -1 then page fault
+        //TLB hit
+        if (phy_pg != -1)
         {
-            pg_fault = pg_fault + 1;
-            phy_pg = free_pg;
-            free_pg = free_pg + 1;
-            //reading from the backing store for that logical page to get physical page/address
-            memcpy(main_mem + phy_pg *PAGE_SIZE, backingStore_ptr + log_pg * PAGE_SIZE, PAGE_SIZE);
-            pg_table[log_pg] = phy_pg;
+            hits = hits + 1;
+        }
+        else
+        { //TLB miss
+           if (phy_pg == -1) //check if page exists in page table, if value = -1 then page fault
+           {
+             pg_fault = pg_fault + 1;
+             phy_pg = free_pg;
+             free_pg = free_pg + 1;
+             //reading from the backing store for that logical page to get physical page/address
+             memcpy(main_mem + phy_pg *PAGE_SIZE, backingStore_ptr + log_pg * PAGE_SIZE, PAGE_SIZE);
+             pg_table[log_pg] = phy_pg;
+           }
+           add_pg(log_pg, phy_pg, tlb, index);
         }
         
         int phy_add = (phy_pg << OFFSET_BITS) | offset;
