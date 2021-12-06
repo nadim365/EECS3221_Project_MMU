@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "tlb.h"
 #define SIZE 100
 
 //Page and fram and TLB specifications
@@ -19,6 +20,8 @@
 int pg_table[PAGES];
 signed char main_mem[MEM_size];
 signed char *backingStore_ptr;
+struct TLB_val tlb[TLB_SIZE];
+int index = 0; // count how many pages inserted into TLB
 
 int main(int argc, const char *argv[])
 {
